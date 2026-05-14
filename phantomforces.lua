@@ -1336,9 +1336,8 @@ do -- UI Library (bron4ik shim)
 
         function menu:GetValue(section, name)
             local sec = self.sectionIndexes[section]
-            if sec == nil then return false end
-            local v = sec[name]
-            return v ~= nil and v or false
+            if sec == nil then return nil end
+            return sec[name]
         end
 
         function menu:SetValue(section, name, value)
@@ -1358,9 +1357,8 @@ do -- UI Library (bron4ik shim)
     -- wire GetValue to read from sectionIndexes
     function wapus:GetValue(section, name)
         local sec = self._sectionIndexes[section]
-        if sec == nil then return false end
-        local v = sec[name]
-        return v ~= nil and v or false
+        if sec == nil then return nil end
+        return sec[name]  -- returns nil if missing, letting callers use 'or' fallbacks
     end
 
     -- unload stub
@@ -3259,11 +3257,11 @@ LPH_JIT_MAX(function() -- Main Cheat
         if barrel then barrel = (barrel.Z > 0 and Vector2.new(barrel.X, barrel.Y)); end
         local middle = barrel or (camera.ViewportSize * 0.5)
         local x, y = middle.X, middle.Y
-        local sx = wapus:GetValue("Crosshair", "X Space") * 0.5
-        local sy = wapus:GetValue("Crosshair", "Y Space") * 0.5
-        local w = wapus:GetValue("Crosshair", "X Size")
-        local h = wapus:GetValue("Crosshair", "Y Size")
-        local speed = wapus:GetValue("Crosshair", "Spin Speed")
+        local sx = (wapus:GetValue("Crosshair", "X Space") or 10) * 0.5
+        local sy = (wapus:GetValue("Crosshair", "Y Space") or 10) * 0.5
+        local w = wapus:GetValue("Crosshair", "X Size") or 10
+        local h = wapus:GetValue("Crosshair", "Y Size") or 10
+        local speed = wapus:GetValue("Crosshair", "Spin Speed") or 0
         crossdot.Position = middle
 
         if speed == 0 or force then
@@ -3439,7 +3437,7 @@ LPH_JIT_MAX(function() -- Main Cheat
             lastSpamIndex = newSpamIndex
         end
 
-        task.delay(wapus:GetValue("Chat Spam", "Spam Delay"), chatSpam)
+        task.delay(tonumber(wapus:GetValue("Chat Spam", "Spam Delay")) or 2.51, chatSpam)
     end
     task.delay(1, chatSpam)
 
@@ -4782,11 +4780,10 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
 
     local function getConfigNames()
         local names = {}
-
+        if not isfolder(folderName .. "/configs") then return names end
         for _, name in listfiles(folderName .. "/configs") do
             table.insert(names, table.pack(string.gsub(string.gsub(string.gsub(name, ".json", ""), folderName .. "/configs/", ""), folderName .. "\\configs\\", ""))[1])
         end
-
         return names
     end
 
@@ -4853,40 +4850,40 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
         saveConfig(folderName .. "/cache/settings.json", {open = menu.open, index = menu.tabIndex})
     end
 
-    local legit = menu:CreateTab("Legit")
-    local rage = menu:CreateTab("Rage")
-    local visuals = menu:CreateTab("Visuals")
-    local misc = menu:CreateTab("Misc")
-    local settings = menu:CreateTab("Settings")
+    -- ── TAB LAYOUT (RostAlpha/LoneBeta style) ────────────────────────────
+    local CombatPage = menu:CreateTab("Combat")   -- Aimbot + Silent Aim + Rage + Anti-Aim
+    local VisualsPage = menu:CreateTab("Visuals")  -- ESP + Chams + World + Crosshair
+    local MiscPage    = menu:CreateTab("Misc")     -- Movement + Sounds + Tweaks + Config
 
-    local aimbot = legit:CreateSection("Aim Bot", false, "half")
-    local fovsettings = aimbot:AddSection("FOV Settings", false, "half")
-    local silentaim = legit:CreateSection("Silent Aim", true, "half")
-    local backtrack = legit:CreateSection("Backtracking", false, "half")
-    local hitboxes = backtrack:AddSection("Hit Boxes")
-    local gunmods = legit:CreateSection("Gun Mods", true, "half")
+    -- Combat: left = Aimbot / Silent Aim, right = Rage Bot / Anti-Aim / Gun Mods
+    local aimbot      = CombatPage:CreateSection("Aim Bot",      false, "half")
+    local fovsettings = aimbot:AddSection("FOV Settings")
+    local silentaim   = CombatPage:CreateSection("Silent Aim",   true,  "half")
+    local ragebot     = CombatPage:CreateSection("Rage Bot",     false, "half")
+    local backtrack   = CombatPage:CreateSection("Backtracking", true,  "half")
+    local hitboxes    = backtrack:AddSection("Hit Boxes")
+    local knifebot    = CombatPage:CreateSection("Knife Bot",    false, "half")
+    local antiaim     = CombatPage:CreateSection("Anti Aim",     true,  "half")
+    local fakelag     = antiaim
+    local gunmods     = CombatPage:CreateSection("Gun Mods",     false, "half")
 
-    local ragebot = rage:CreateSection("Rage Bot", false, "half")
-    local knifebot = rage:CreateSection("Knife Bot", false, "half");
-    local antiaim = rage:CreateSection("Anti Aim", true, "whole");
-    local fakelag = antiaim
-
-    local enemyesp = visuals:CreateSection("Enemy ESP", false, "whole")
-    --local teamesp = enemyesp:AddSection("Team ESP")
-    local chams = visuals:CreateSection("Chams", true, "half")
-    local morechams = chams:AddSection("More Chams")
+    -- Visuals: left = ESP, right = Chams + Third Person + Crosshair
+    local enemyesp    = VisualsPage:CreateSection("Enemy ESP",    false, "half")
+    local chams       = VisualsPage:CreateSection("Chams",        true,  "half")
+    local morechams   = chams:AddSection("More Chams")
     local worldvisuals = chams:AddSection("World Visuals")
-    local thirdperson = visuals:CreateSection("Third Person", true, "half")
-    local customChar = thirdperson:AddSection("Custom Model")
-    local crosshair = thirdperson:AddSection("Crosshair")
+    local thirdperson = VisualsPage:CreateSection("Third Person", false, "half")
+    local customChar  = thirdperson:AddSection("Custom Model")
+    local crosshair   = VisualsPage:CreateSection("Crosshair",   true,  "half")
 
-    local movement = misc:CreateSection("Movement", false, "half")
-    local sounds = misc:CreateSection("Sounds", false, "half")
-    local tweaks = misc:CreateSection("Tweaks", true, "third")
+    -- Misc: left = Movement + Sounds, right = Tweaks + Chat + Server + Config
+    local movement    = MiscPage:CreateSection("Movement",       false, "half")
+    local sounds      = MiscPage:CreateSection("Sounds",         false, "half")
+    local tweaks      = MiscPage:CreateSection("Tweaks",         true,  "half")
     local antivotekick = tweaks:AddSection("Anti Votekick")
-    local chatspam = misc:CreateSection("Chat Spam", true, "third")
-    local hopper = misc:CreateSection("Server Hopper", true, "third")
-    --local votekick = hopper:AddSection("Votekick")
+    local chatspam    = MiscPage:CreateSection("Chat Spam",      true,  "half")
+    local hopper      = MiscPage:CreateSection("Server Hopper",  false, "half")
+    local cheatSettings = MiscPage:CreateSection("Settings",     true,  "half")
 
     aimbot:AddToggle("Enabled", false, getCallback("Aim Bot%%Enabled")):AddKeyBind(nil, "Key Bind")
     aimbot:AddToggle("Visible Check", false, getCallback("Aim Bot%%Visible Check"))
@@ -5131,18 +5128,9 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
     hopper:AddButton("Copy Join Script", getCallback("Server Hopper%%Copy Join Script"))
     hopper:AddButton("Clear Cached Servers", getCallback("Server Hopper%%Clear Cached Servers"))
 
-    settings:CreatePlayerList({"Friendly", "Target"}, {
-        status = function(player, status)
-            playerStatus[player] = status
-        end,
-        votekick = function(player)
-        end,
-        spectate = function(player)
-        end
-    })
-
-    local cheatSettings = settings:CreateSection("Cheat Settings", false, "third")
-    local configuration = settings:CreateSection("Configuration", true, "third")
+    -- Player list removed (not supported in bron4ik)
+    -- cheatSettings and configuration use the sections defined in MiscPage above
+    local configuration = cheatSettings:AddSection("Configuration")
 
     cheatSettings:AddToggle("Save Last Config", true, getCallback("Cheat Settings%%Save Last Config"))
     cheatSettings:AddToggle("Show Keybind List", false, getCallback("Cheat Settings%%Show Keybind List"))
@@ -5209,19 +5197,9 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
 
     if configExists then
         local config = httpService:JSONDecode(readfile(folderName .. "/cache/lastfile.json"))
-
         if config["Cheat Settings%%Save Last Config"] ~= false then
             loadConfig(config)
         end
-
-        local keybinds = config["Keybinds"]
-
-        if keybinds then
-            for _, data in keybinds do
-                local name, key = table.unpack(data)
-                local section, element = table.unpack(string.split(name, "%%"))
-                menu.sectionIndexes[section].flags[element].keybind:SetValue(key)
-            end
-        end
+        -- keybind restore not supported in bron4ik shim
     end
 end)()
