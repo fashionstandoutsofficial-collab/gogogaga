@@ -1335,7 +1335,10 @@ do -- UI Library (bron4ik shim)
         end
 
         function menu:GetValue(section, name)
-            return wapus:GetValue(section, name)
+            local sec = self.sectionIndexes[section]
+            if sec == nil then return false end
+            local v = sec[name]
+            return v ~= nil and v or false
         end
 
         function menu:SetValue(section, name, value)
