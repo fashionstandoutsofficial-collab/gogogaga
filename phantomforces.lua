@@ -1347,8 +1347,8 @@ do -- UI Library (bron4ik shim)
 
         function menu:updateCache() end -- no-op, bron4ik handles persistence
 
-        -- expose CreateSettingsPage equivalent
-        Library:CreateSettingsPage(Window, Watermark, KeybindList)
+        -- Settings page handled within Misc tab instead
+        -- Library:CreateSettingsPage(Window, Watermark, KeybindList)
 
         table.insert(wapus.menus, menu)
         return menu
@@ -4724,12 +4724,12 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
 
     if not isfile(folderName .. "/chat spam lists/default.txt") then
         writefile(folderName .. "/chat spam lists/default.txt", httpService:JSONEncode({
-            "but doctor prognosis: OWNED", -- legacy a pro for this list
-            "but doctor results: 🔥",
-            "looks like you need to talk to your doctor",
-            "speak to your doctor about this one",
-            "but analysis: PWNED",
-            "but diagnosis: OWND"
+            "but Osiris souce: fucked", -- legacy a pro for this list
+            "but Osiris ass quality: 🔥",
+            "Osiris on top?",
+            "speak to chese about this one",
+            "but Osiris source: loaned",
+            "but Osiris skidding: manned"
         }))
     end
 
@@ -4859,13 +4859,8 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
     local aimbot      = CombatPage:CreateSection("Aim Bot",      false, "half")
     local fovsettings = aimbot:AddSection("FOV Settings")
     local silentaim   = CombatPage:CreateSection("Silent Aim",   true,  "half")
-    local ragebot     = CombatPage:CreateSection("Rage Bot",     false, "half")
-    local backtrack   = CombatPage:CreateSection("Backtracking", true,  "half")
-    local hitboxes    = backtrack:AddSection("Hit Boxes")
-    local knifebot    = CombatPage:CreateSection("Knife Bot",    false, "half")
-    local antiaim     = CombatPage:CreateSection("Anti Aim",     true,  "half")
-    local fakelag     = antiaim
-    local gunmods     = CombatPage:CreateSection("Gun Mods",     false, "half")
+    local antiaim     = CombatPage:CreateSection("Anti Aim",     false, "half")
+    local gunmods     = CombatPage:CreateSection("Gun Mods",     true,  "half")
 
     -- Visuals: left = ESP, right = Chams + Third Person + Crosshair
     local enemyesp    = VisualsPage:CreateSection("Enemy ESP",    false, "half")
@@ -4914,18 +4909,7 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
     silentaim:AddSlider("Dead FOV Radius", 100, 1, 1000, 1, "px", getCallback("Silent Aim%%Dead FOV Radius"))
     silentaim:AddToggle("Show Dead FOV Circle", false, getCallback("Silent Aim%%Show Dead FOV Circle")):AddKeyBind(nil, "Dead FOV Key Bind"):AddColorPicker("Dead FOV Circle Color", Color3.new(1, 1, 1), getCallback("Silent Aim%%Dead FOV Circle Color"))
 
-    hitboxes:AddToggle("Enabled", false, getCallback("Hit Boxes%%Enabled")):AddKeyBind(nil, "Key Bind"):AddColorPicker("Color", Color3.new(0.1, 0.1, 1), getCallback("Hit Boxes%%Color"))
-    hitboxes:AddDropdown("Hit Part", "Head", {"Head", "Torso"}, getCallback("Hit Boxes%%Hit Part"))
-    hitboxes:AddSlider("Size", 20, 1, 20, 1, " Studs", getCallback("Hit Boxes%%Size"))
-    hitboxes:AddSlider("Transparency", 50, 0, 100, 1, "%", getCallback("Hit Boxes%%Transparency"))
-    hitboxes:AddDropdown("Material", "SmoothPlastic", {"ForceField", "SmoothPlastic", "Glass"}, getCallback("Hit Boxes%%Material"))
-
-    backtrack:AddToggle("Enabled", false, getCallback("Backtracking%%Enabled")):AddKeyBind(nil, "Key Bind"):AddColorPicker("Character Color", Color3.new(0.1, 0.1, 1), getCallback("Backtracking%%Characters Color"))
-    backtrack:AddSlider("Refresh Rate", 2, 1, 10, 1, " Characters/Second", getCallback("Backtracking%%Refresh Rate"))
-    backtrack:AddSlider("Character Duration", 1, 0.1, 1, 0.1, " Seconds", getCallback("Backtracking%%Character Duration"))
-    backtrack:AddSlider("Character Transparency", 50, 0, 100, 1, "%", getCallback("Backtracking%%Character Transparency"))
-    backtrack:AddDropdown("Character Material", "ForceField", {"ForceField", "SmoothPlastic", "Glass"}, getCallback("Backtracking%%Character Material"))
-    backtrack:AddToggle("Clone Character", true, getCallback("Backtracking%%Clone Character"))
+    -- Hit Boxes / Backtracking removed
 
     gunmods:AddToggle("No Recoil", false, getCallback("Gun Mods%%No Recoil"))
     gunmods:AddToggle("No Spread", false, getCallback("Gun Mods%%No Spread"))
@@ -4938,20 +4922,7 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
     gunmods:AddToggle("No Gun Sway", false, getCallback("Gun Mods%%No Gun Sway"))
     gunmods:AddToggle("Instant Reload", false, getCallback("Gun Mods%%Instant Reload"))
 
-    ragebot:AddToggle("Enabled", false, getCallback("Rage Bot%%Enabled")):AddKeyBind(nil, "Key Bind")
-    ragebot:AddToggle("Shoot Effects", false, getCallback("Rage Bot%%Shoot Effects"))
-    ragebot:AddToggle("Fire Position Scanning", false, getCallback("Rage Bot%%Fire Position Scanning"))
-    ragebot:AddSlider("Fire Position Offset", 9, 1, 15.9, 0.1, " Studs", getCallback("Rage Bot%%Fire Position Offset"))
-    ragebot:AddToggle("Hit Position Scanning", false, getCallback("Rage Bot%%Hit Position Scanning"))
-    ragebot:AddSlider("Hit Position Offset", 6, 1, 10, 0.1, " Studs", getCallback("Rage Bot%%Hit Position Offset"))
-    --ragebot:AddToggle("Firerate (May Cause Kicking)", false, getCallback("Rage Bot%%Firerate (May Cause Kicking)"))
-    ragebot:AddToggle("Only Shoot Target Status", false, getCallback("Rage Bot%%Only Shoot Target Status")):AddKeyBind(nil, "Target Key Bind")
-    ragebot:AddToggle("Whitelist Friendly Status", true, getCallback("Rage Bot%%Whitelist Friendly Status")):AddKeyBind(nil, "Friendly Key Bind")
-
-    knifebot:AddToggle("Kill All (May Despawn)", false, getCallback("Knife Bot%%Kill All (May Despawn)")):AddKeyBind(nil, "Key Bind")
-    knifebot:AddToggle("Only When Holding Knife", false, getCallback("Knife Bot%%Only When Holding Knife"))
-    knifebot:AddToggle("Only Kill Target Status", false, getCallback("Knife Bot%%Only Kill Target Status")):AddKeyBind(nil, "Terget Key Bind")
-    knifebot:AddToggle("Whitelist Friendly Status", true, getCallback("Knife Bot%%Whitelist Friendly Status")):AddKeyBind(nil, "Friendly Key Bind")
+    -- Knife Bot, Fake Lag, Backtracking removed
 
     antiaim:AddToggle("Enabled (May Cause Despawning)", false, getCallback("Anti Aim%%Enabled (May Cause Despawning)"))-- :AddKeyBind(nil, "Key Bind") broken
     antiaim:AddToggle("Yaw", false, getCallback("Anti Aim%%Yaw"))
@@ -4968,12 +4939,7 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
     antiaim:AddToggle("Force Stance", false, getCallback("Anti Aim%%Force Stance"))
     antiaim:AddDropdown("Set Stance", "Prone", {"Stand", "Crouch", "Prone"}, getCallback("Anti Aim%%Set Stance"));
 
-    fakelag:AddToggle('Fake Lag', false, getCallback('Fake Lag%%Enabled')):AddKeyBind(nil, 'Key Bind');
-    fakelag:AddToggle('Randomize Position', false, getCallback('Fake Lag%%Randomize Position'));
-    fakelag:AddSlider('X-Axis Factor', 0, 0, 8.9, 1, ' Studs', getCallback('Fake Lag%%X-Axis Factor'));
-    fakelag:AddSlider('Z-Axis Factor', 0, 0, 8.9, 1, ' Studs', getCallback('Fake Lag%%Z-Axis Factor'));
-    fakelag:AddSlider('Refresh Distance', 5, 0, 8.9, 0.1, ' Studs', getCallback('Fake Lag%%Refresh Distance'));
-    fakelag:AddSlider('Refresh Rate', 1, 0, 10, 1, ' Seconds', getCallback('Fake Lag%%Refresh Rate'))
+    -- Fake Lag removed
 
     enemyesp:AddToggle("Enabled", true, getCallback("Enemy ESP%%Enabled"))
     enemyesp:AddToggle("Boxes", false, getCallback("Enemy ESP%%Boxes")):AddColorPicker("Box Color", Color3.fromRGB(0,255,255), getCallback("Enemy ESP%%Box Color"))
