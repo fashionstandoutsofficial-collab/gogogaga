@@ -4871,14 +4871,17 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
     local customChar  = thirdperson:AddSection("Custom Model")
     local crosshair   = VisualsPage:CreateSection("Crosshair",   true,  "half")
 
-    -- Misc: left = Movement + Sounds, right = Tweaks + Chat + Server + Config
+    -- Misc: left = Movement + Sounds, right = Tweaks + Chat + Server
     local movement    = MiscPage:CreateSection("Movement",       false, "half")
     local sounds      = MiscPage:CreateSection("Sounds",         false, "half")
     local tweaks      = MiscPage:CreateSection("Tweaks",         true,  "half")
-    local antivotekick = tweaks:AddSection("Anti Votekick")
     local chatspam    = MiscPage:CreateSection("Chat Spam",      true,  "half")
     local hopper      = MiscPage:CreateSection("Server Hopper",  false, "half")
-    local cheatSettings = MiscPage:CreateSection("Settings",     true,  "half")
+
+    -- Settings tab (separate, after Misc)
+    local SettingsPage  = menu:CreateTab("Settings")
+    local cheatSettings = SettingsPage:CreateSection("Cheat Settings", false, "half")
+    local configuration = SettingsPage:CreateSection("Configuration",  true,  "half")
 
     aimbot:AddToggle("Enabled", false, getCallback("Aim Bot%%Enabled")):AddKeyBind(nil, "Key Bind")
     aimbot:AddToggle("Visible Check", false, getCallback("Aim Bot%%Visible Check"))
@@ -5075,13 +5078,7 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
     tweaks:AddButton("Unlock All Camos", getCallback("Tweaks%%Unlock All Camos"))
     tweaks:AddButton("Unlock All", getCallback("Tweaks%%Unlock All"))
 
-    antivotekick:AddButton("Initiate Multi-Instance Anti Votekick", function()
-        writefile(folderName .. "/cache/votekick data/" .. fileName, userName)
-    end)
-
-    antivotekick:AddButton("Copy YouTube Tutorial Link", function()
-        setclipboard("https://youtu.be/dvyiz8iVe5g")
-    end)
+    -- Anti Votekick removed
 
     chatspam:AddToggle("Enabled", false, getCallback("Chat Spam%%Enabled")):AddKeyBind(nil, "Key Bind")
     chatspam:AddDropdown("Spam List", "default.txt", chatListsFiles, getCallback("Chat Spam%%Spam List"))
@@ -5095,29 +5092,23 @@ LPH_NO_VIRTUALIZE(function() -- Make UI
     hopper:AddButton("Clear Cached Servers", getCallback("Server Hopper%%Clear Cached Servers"))
 
     -- Player list removed (not supported in bron4ik)
-    -- cheatSettings and configuration use the sections defined in MiscPage above
-    local configuration = cheatSettings:AddSection("Configuration")
 
     cheatSettings:AddToggle("Save Last Config", true, getCallback("Cheat Settings%%Save Last Config"))
     cheatSettings:AddToggle("Show Keybind List", false, getCallback("Cheat Settings%%Show Keybind List"))
     cheatSettings:AddToggle("Show Key Name", false, getCallback("Cheat Settings%%Show Key Name"))
     cheatSettings:AddButton("Copy Discord Invite", function()
-        setclipboard("https://discord.gg/tUEJZYvF9d") -- pro
+        setclipboard("https://discord.gg/tUEJZYvF9d")
     end)
     cheatSettings:AddButton("Unload", function()
         unloadMain()
         stillGoing = false
-
         for _, drawingFolder in game:GetService("CoreGui"):GetChildren() do
             if drawingFolder.Name == "Drawing API By iRay" then
                 drawingFolder:Destroy()
             end
         end
-
         for _, connection in connectionList do
-            pcall(function()
-                connection:Disconnect()
-            end)
+            pcall(function() connection:Disconnect() end)
         end
     end)
 
